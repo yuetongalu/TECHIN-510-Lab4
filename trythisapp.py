@@ -1,36 +1,38 @@
 import streamlit as st
-import datetime
 import pytz
-
-st.title("World Clock")
-
-# Time zones we want to display
-time_zones = {
-    "Los Angeles": "America/Los_Angeles",
-    "New York": "America/New_York",
-    "London": "Europe/London",
-    "Moscow": "Europe/Moscow",
-    "Tokyo": "Asia/Tokyo",
-    "Sydney": "Australia/Sydney"
-}
-
-# Dropdown for selecting locations
-selected_cities = st.multiselect("Select Locations", options=list(time_zones.keys()), default=["New York"], help="You can select up to 4 locations.")
-
-# Limit selection to 4 locations
-if len(selected_cities) > 4:
-    st.error("You can select up to 4 locations.")
-else:
-    for city in selected_cities:
-        tz = time_zones[city]
-        now = datetime.datetime.now(pytz.timezone(tz))
-        unix_timestamp = now.timestamp()
-        st.metric(city, now.strftime("%Y-%m-%d %H:%M:%S"), f"UNIX: {unix_timestamp}")
-        st.write(f"UNIX timestamp: {unix_timestamp}")
-        st.write(f"Convert UNIX timestamp to Human time: [Convert](https://example.com/convert?timestamp={unix_timestamp})")
-        st.write("Real-time data:")
-        st.write("- Finance: [Stock](https://example.com/finance/stock), [Forex](https://example.com/finance/forex), [Bitcoin](https://example.com/finance/bitcoin)")
-        st.write("- Weather: [Current Weather](https://example.com/weather/current)")
-        st.write("- 911 Calls: [Latest 911 Calls](https://example.com/911/latest)")
-        
-        
+from datetime import datetime
+# Import the get_stock_price function from hello.py
+from hello import get_stock_price
+# Title of the web app
+st.title('World Clock & Finance Data')
+# Section for World Clock
+st.header('World Clock')
+# Dropdown menu for location selection
+locations = pytz.all_timezones
+selected_locations = st.multiselect('Select up to 4 locations:', locations, default=["UTC"])
+# Display the time in the selected locations
+for loc in selected_locations[:4]:  # Limit to up to 4 locations
+   timezone = pytz.timezone(loc)
+   loc_time = datetime.now(timezone)
+   st.write(f"Time in {loc}: {loc_time.strftime('%Y-%m-%d %H:%M:%S')}")
+# Finance Data Section
+st.header('Finance Data')
+# User input for stock symbol
+user_symbol = st.text_input('Enter a stock symbol (e.g., AAPL for Apple):')
+# Button to fetch stock price
+if st.button('Get Stock Price'):
+   if user_symbol:
+       # Display stock price using the hello.py functionality
+       stock_price = get_stock_price(user_symbol)
+       st.write(stock_price)
+   else:
+       st.write("Please enter a stock symbol.")
+# Bonus: UNIX Timestamp and Conversion
+st.header('Bonus Features')
+if st.checkbox('Show UNIX Timestamp'):
+   st.write(f"Current UNIX Timestamp: {datetime.now().timestamp()}")
+if st.checkbox('Convert UNIX Timestamp to Human Time'):
+   unix_input = st.number_input('Enter UNIX Timestamp:', step=1.0, format="%f")
+   if unix_input:
+       human_time = datetime.fromtimestamp(unix_input)
+       st.write(f"Human Time: {human_time.strftime('%Y-%m-%d %H:%M:%S')}")
